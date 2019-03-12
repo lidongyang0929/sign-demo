@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>注册</title>
+    <style>
+     *{padding: 0;margin: 0;box-sizing:border-box;}
+     body{
+     height: 100vh;
+     display: flex;
+     justify-content: center;
+     align-items: center;}
+    .form-wrapper{
+    border: 1px solid #ddd;
+    padding: 20px;
+    }
+    .form-wrapper .row{
+    margin: 10px 0;
+    min-width: 300px;
+    }
+    .form-wrapper .row> label{
+    display: inline-block;
+    min-width: 4em;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="form-wrapper">
+        <form id=signInForm>
+            <h1>登录</h1>
+            <div class="row">
+                <label>邮箱</label>
+                <input type="text" name="email">
+                <span class="error"></span>
+            </div>
+            <div class="row">
+                <label>密码</label>
+                <input type="password" name="password"> 
+                <span class="error"></span>   
+            </div>
+            <div class="row">
+                <input type="submit" value="登录">
+            </div>
+        </form>
+    </div>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        $('#signInForm').on('submit', (e) => {
+            e.preventDefault()
+            let hash = {};
+            let need = ['email', 'password']
+            need.forEach((name) => {
+                let value = $('#signInForm').find(`[name=${name}]`).val()
+                hash[name] = value
+            })
+            $('#signInForm').find('.error').each((index,span)=>{$(span).text('')})
+            if(hash['email'] === ''){
+                $('#signInForm').find('[name="email"]').siblings('.error').text('请填邮箱')
+                return
+            }if(hash['password'] === ''){
+                $('#signInForm').find('[name="password"]').siblings('.error').text('请填密码')
+                return
+            }
+            $.post('/sign_in', hash)  
+           .then((response)=>{
+            window.location.href = '/'
+            console.log(1)
+            }, (request)=>{
+            alert('邮箱与密码不匹配')
+           })
+           })
+
+
+
+    </script>
+</body>
+
+</html>
