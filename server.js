@@ -21,6 +21,30 @@ var server = http.createServer(function (request, response) {
 
   if (path === '/') {
     var string = fs.readFileSync('./index.html', 'utf8')
+    var cookies = request.headers.cookie.split('; ')
+    let hash = {}
+    for(let i=0;i<cookies.length;i++){
+        let parts = cookies[i].split('=') 
+        let key = parts[0]
+        let value = parts[1]
+        hash[key] = value
+    }
+    
+    let email = hash.sign_in_email
+    let users = fs.readFileSync('./db/users','utf8')
+    users = JSON.parse(users)
+    let userFound
+    for(let i=0;i<users.length;i++){
+      if(users[i].email= email){
+        userFound = users[i]
+        break
+      }
+    }
+    if(userFound){
+      string = string.replace('__password__',userFound.password)
+    }else{
+      string = string.replace('__password__',不知道)
+    }
     response.statusCode = 200
     response.setHeader('Content-Type', 'text/html;charset=utf-8')
     response.write(string)
