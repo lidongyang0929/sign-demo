@@ -68,7 +68,6 @@
             $.post('/sign_in', hash)  
            .then((response)=>{
             window.location.href = '/'
-            console.log(1)
             }, (request)=>{
             alert('邮箱与密码不匹配')
            })

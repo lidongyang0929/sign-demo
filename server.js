@@ -7,6 +7,7 @@ if (!port) {
   console.log('请指定端口号好不啦？\nnode server.js 8888 这样不会吗？')
   process.exit(1)
 }
+let sessions = {}
 
 var server = http.createServer(function (request, response) {
   var parsedUrl = url.parse(request.url, true)
@@ -21,7 +22,10 @@ var server = http.createServer(function (request, response) {
 
   if (path === '/') {
     var string = fs.readFileSync('./index.html', 'utf8')
-    var cookies = request.headers.cookie.split('; ')
+    let cookies = ''
+    if(request.headers.cookie){
+      cookies = request.headers.cookie.split('; ')
+    }
     let hash = {}
     for(let i=0;i<cookies.length;i++){
         let parts = cookies[i].split('=') 
@@ -29,8 +33,11 @@ var server = http.createServer(function (request, response) {
         let value = parts[1]
         hash[key] = value
     }
-    
-    let email = hash.sign_in_email
+    let mySession = sessions[hash.sessionId]
+    let email
+    if(mySession){
+     email = mySession.sign_in_email
+    }
     let users = fs.readFileSync('./db/users','utf8')
     users = JSON.parse(users)
     let userFound
@@ -43,7 +50,7 @@ var server = http.createServer(function (request, response) {
     if(userFound){
       string = string.replace('__password__',userFound.password)
     }else{
-      string = string.replace('__password__',不知道)
+      string = string.replace('__password__','不知道')
     }
     response.statusCode = 200
     response.setHeader('Content-Type', 'text/html;charset=utf-8')
@@ -85,8 +92,7 @@ var server = http.createServer(function (request, response) {
       }
       let inuse = false
       for(let i =0;i<users.length;i++){
-        let user = users[i]
-        if(user.email === email){
+        if(users[i].email === email){
           inuse = true
           break
         }}
@@ -135,7 +141,9 @@ var server = http.createServer(function (request, response) {
         break
         }
       }if(found){
-        response.setHeader('Set-Cookie', `sign_in_email=${email}`)
+        let sessionId = Math.random() * 100000
+        sessions[sessionId] = {sign_in_email:email}
+        response.setHeader('Set-Cookie', `sessionId=${sessionId}`)
         response.statusCode = 200
       }else{
         response.statusCode = 401
